@@ -16,6 +16,7 @@ cd frappe-bench
 
 # Use containers instead of localhost
 bench set-mariadb-host mariadb
+bench set-config -g db_port 3310
 bench set-redis-cache-host redis://redis:6379
 bench set-redis-queue-host redis://redis:6379
 bench set-redis-socketio-host redis://redis:6379
@@ -23,6 +24,9 @@ bench set-redis-socketio-host redis://redis:6379
 # Remove redis, watch from Procfile
 sed -i '/redis/d' ./Procfile
 sed -i '/watch/d' ./Procfile
+
+# Bind web server to all interfaces so it's reachable via published container port
+sed -i 's/^web:.*bench serve.*/web: bench serve --port 8000 --host 0.0.0.0/' ./Procfile
 
 bench get-app erpnext
 bench get-app hrms

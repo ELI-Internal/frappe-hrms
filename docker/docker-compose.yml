@@ -7,10 +7,18 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
       - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
+      - --port=3310
     environment:
       MYSQL_ROOT_PASSWORD: 123
+    ports:
+      - "3310:3310"
     volumes:
       - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-P", "3310", "-uroot", "-p123"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   redis:
     image: redis:alpine
@@ -26,6 +34,9 @@ services:
     ports:
       - 8000:8000
       - 9000:9000
+    depends_on:
+      mariadb:
+        condition: service_healthy
 
 volumes:
   mariadb-data:
